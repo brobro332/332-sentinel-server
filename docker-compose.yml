@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - efk
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.18
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - efk
+
+  filebeat:
+    build:
+      context: ./filebeat
+      dockerfile: filebeat.dockerfile
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./sentinel-app/logs:/app/logs
+    depends_on:
+      - elasticsearch
+    networks:
+      - efk
+
+  gateway:
+    build:
+      context: ./sentinel-app
+    container_name: sentinel-app
+    ports:
+      - "8080:8080"
+    volumes:
+    - ./sentinel-app/logs:/app/logs
+    networks:
+      - efk
+
+volumes:
+  esdata:
+
+networks:
+  efk:
