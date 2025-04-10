@@ -1,18 +1,24 @@
 <configuration>
+    <include resource="net/logstash/logback/logback.xml"/>
     <property name="LOG_PATH" value="./logs"/>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/app-%d{yyyyMM}.log</fileNamePattern>
-            <maxHistory>12</maxHistory>
+            <fileNamePattern>${LOG_PATH}/app-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
         </rollingPolicy>
-
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <fieldNames>
+                <timestamp>@timestamp</timestamp>
+                <level>level</level>
+                <logger>logger</logger>
+                <thread>thread</thread>
+                <message>message</message>
+            </fieldNames>
         </encoder>
     </appender>
 
     <root level="INFO">
-        <appender-ref ref="FILE"/>
+        <appender-ref ref="JSON_FILE"/>
     </root>
 </configuration>

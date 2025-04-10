@@ -26,14 +26,16 @@ services:
     networks:
       - efk
 
-  filebeat:
-    build:
-      context: ./filebeat
-      dockerfile: filebeat.dockerfile
-    container_name: filebeat
-    user: root
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.18
+    container_name: logstash
     volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
       - ./sentinel-app/logs:/app/logs
+    ports:
+      - "5044:5044"
+      - "9600:9600"
     depends_on:
       - elasticsearch
     networks:
