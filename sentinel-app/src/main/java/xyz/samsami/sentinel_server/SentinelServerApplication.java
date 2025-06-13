@@ -1,13 +1,13 @@
-package kr.co.samsami_sentinel_server;
+package xyz.samsami.sentinel_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SamsamiSentinelServerApplication {
+public class SentinelServerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SamsamiSentinelServerApplication.class, args);
+		SpringApplication.run(SentinelServerApplication.class, args);
 	}
 
 }
