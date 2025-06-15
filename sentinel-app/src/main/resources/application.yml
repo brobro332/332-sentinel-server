@@ -1,0 +1,28 @@
+server:
+  port: ${PORT}
+  address: ${ADDRESS}
+
+spring:
+  data:
+    mongodb:
+      username: ${DATA_MONGODB_USERNAME}
+      password: ${DATA_MONGODB_PASSWORD}
+      authentication-database: ${DATA_MONGODB_AUTHENTICATION_DATABASE}
+      database: ${DATA_MONGODB_DATABASE}
+      uri: ${DATA_MONGODB_URI}
+
+    redis:
+      host: ${DATA_REDIS_HOST}
+      port: ${DATA_REDIS_PORT}
+  cloud:
+    gateway:
+      routes:
+        - id: 332-blokey-land-service
+          uri: http://host.docker.internal:8081
+          predicates:
+            - Path=/blokey-land/**
+          filters:
+            - RewritePath=/blokey-land/(?<remaining>.*), /${remaining}
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
