@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.18
@@ -10,21 +8,11 @@ services:
     volumes:
       - esdata:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
+      - "${ELASTICSEARCH_EXTERNAL_PORT}:${ELASTICSEARCH_INTERNAL_PORT}"
     networks:
-      - efk
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.18
-    container_name: kibana
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-    networks:
-      - efk
+      - network-sentinel
+    env_file:
+      - .env
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.17.18
@@ -34,26 +22,70 @@ services:
       - ./logstash/pipeline:/usr/share/logstash/pipeline
       - ./sentinel-app/logs:/app/logs
     ports:
-      - "5044:5044"
-      - "9600:9600"
+      - "${LOGSTASH_EXTERNAL_PORT_1}:${LOGSTASH_INTERNAL_PORT_1}"
+      - "${LOGSTASH_EXTERNAL_PORT_2}:${LOGSTASH_INTERNAL_PORT_2}"
     depends_on:
       - elasticsearch
     networks:
-      - efk
+      - network-sentinel
+    env_file:
+      - .env
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.18
+    container_name: kibana
+    ports:
+      - "${KIBANA_EXTERNAL_PORT}:${KIBANA_EXTERNAL_PORT}"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:${ELASTICSEARCH_EXTERNAL_PORT}
+    depends_on:
+      - elasticsearch
+    networks:
+      - network-sentinel
+    env_file:
+      - .env
 
   gateway:
     build:
       context: ./sentinel-app
     container_name: sentinel-app
     ports:
-      - "8080:8080"
+      - "${PORT}:${PORT}"
     volumes:
     - ./sentinel-app/logs:/app/logs
     networks:
-      - efk
+      - network-sentinel
+    env_file:
+      - .env
 
+  redis:
+    image: redis:7.2.5
+    container_name: redis
+    ports:
+      - "${REDIS_EXTERNAL_PORT}:${REDIS_INTERNAL_PORT}"
+    volumes:
+      - redisdata:/data
+    networks:
+      - network-sentinel
+    env_file:
+      - .env
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "${MONGODB_EXTERNAL_PORT}:${MONGODB_INTERNAL_PORT}"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - network-sentinel
+    env_file:
+      - .env
+      
 volumes:
   esdata:
+  redisdata:
+  mongodata:
 
 networks:
-  efk:
+  network-sentinel:
