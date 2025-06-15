@@ -21,9 +21,9 @@ bin/
 .idea
 *.iws
 *.iml
-application.yml
 *.log
 *.ipr
+.env
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
