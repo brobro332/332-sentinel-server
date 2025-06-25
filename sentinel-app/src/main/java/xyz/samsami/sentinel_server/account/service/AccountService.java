@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import xyz.samsami.sentinel_server.account.dispatcher.AccountPostProcessorDispatcher;
 import xyz.samsami.sentinel_server.account.domain.Account;
 import xyz.samsami.sentinel_server.account.dto.AccountReqCreateDto;
 import xyz.samsami.sentinel_server.account.dto.AccountReqLoginDto;
@@ -24,6 +25,7 @@ public class AccountService {
     private final AccountRepository repository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final AccountPostProcessorDispatcher dispatcher;
 
     public Mono<AccountRespCreateDto> createAccount(AccountReqCreateDto dto) {
         return repository.findByEmail(dto.getEmail())
@@ -37,7 +39,10 @@ public class AccountService {
                         .email(dto.getEmail())
                         .password(passwordEncoder.encode(dto.getPassword()))
                         .build();
-                    return repository.save(account);
+                    return repository.save(account)
+                        .flatMap(savedAccount -> dispatcher.process(dto.getType(), savedAccount, dto)
+                        .thenReturn(savedAccount)
+                    );
                 })
             )
             .map(AccountMapper::toRespDto);
