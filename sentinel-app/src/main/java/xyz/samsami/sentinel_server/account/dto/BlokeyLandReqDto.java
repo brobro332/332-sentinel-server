@@ -4,17 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import xyz.samsami.sentinel_server.account.type.AccountType;
+
+import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AccountReqCreateDto {
-    private String email;
-    private String password;
-    private AccountType type;
-
+public class BlokeyLandReqDto {
+    private UUID id;
     private String nickname;
     private String bio;
 }
