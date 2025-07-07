@@ -19,6 +19,7 @@ import xyz.samsami.sentinel_server.common.type.ExceptionType;
 import xyz.samsami.sentinel_server.common.util.CookieUtil;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -29,10 +30,10 @@ public class JwtService {
 
     private static final long REFRESH_TOKEN_EXPIRATION_MILLIS = 7 * 24 * 60 * 60 * 1_000;
 
-    public Mono<AccountRespLoginDto> login(String email) {
+    public Mono<AccountRespLoginDto> login(String email, UUID id) {
         try {
-            String accessToken = provider.createAccessToken(email);
-            String refreshToken = provider.createRefreshToken(email);
+            String accessToken = provider.createAccessToken(email, id);
+            String refreshToken = provider.createRefreshToken(email, id);
 
             return saveRefreshToken(email, refreshToken)
                 .thenReturn(new AccountRespLoginDto(accessToken, refreshToken));
@@ -58,6 +59,7 @@ public class JwtService {
         if (refreshToken == null || !provider.validateToken(refreshToken)) return chain.filter(exchange);
 
         String email = provider.extractEmail(refreshToken);
+        UUID id = UUID.fromString(provider.extractId(refreshToken));
 
         return isRefreshTokenExists(email, refreshToken)
             .flatMap(exists -> {
@@ -65,7 +67,7 @@ public class JwtService {
 
                 String newAccessToken;
                 try {
-                    newAccessToken = provider.createAccessToken(email);
+                    newAccessToken = provider.createAccessToken(email, id);
                 } catch (JOSEException e) {
                     return Mono.error(new CommonException(ExceptionType.INTERNAL_SERVER_ERROR, "토큰 생성 실패"));
                 }
