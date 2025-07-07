@@ -18,7 +18,7 @@ spring:
     gateway:
       routes:
         - id: 332-blokey-land-service
-          uri: http://host.docker.internal:8081
+          uri: http://spring-boot-app:8081
           predicates:
             - Path=/blokey-land/**
           filters:

@@ -13,7 +13,7 @@ public class BlokeyLandPostProcessor implements AccountPostProcessor {
     private final WebClient webClient;
 
     public BlokeyLandPostProcessor(WebClient.Builder builder) {
-        this.webClient = builder.baseUrl("http://blokey-land:8081").build();
+        this.webClient = builder.baseUrl("http://spring-boot-app:8081").build();
     }
 
     @Override
