@@ -23,19 +23,5 @@ spring:
             - Path=/blokey-land/**
           filters:
             - RewritePath=/blokey-land/(?<remaining>.*), /${remaining}
-      globalcors:
-        add-to-simple-url-handler-mapping: true
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins: ${CLOUD_GATEWAY_GLOBALCORS_ALLOWED_ORIGINS}
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
-
 jwt:
   secret-key: ${JWT_SECRET_KEY}

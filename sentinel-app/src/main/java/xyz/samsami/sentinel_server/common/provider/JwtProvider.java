@@ -18,6 +18,7 @@ import xyz.samsami.sentinel_server.common.type.ExceptionType;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -28,11 +29,12 @@ public class JwtProvider {
     private static final long ACCESS_TOKEN_EXPIRATION_MILLIS = 60 * 60 * 1_000;
     private static final long REFRESH_TOKEN_EXPIRATION_MILLIS = 7 * 24 * 60 * 60 * 1_000;
 
-    public String createAccessToken(String email) throws JOSEException {
+    public String createAccessToken(String email, UUID id) throws JOSEException {
         JWSSigner signer = new MACSigner(secretKey.getBytes(StandardCharsets.UTF_8));
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-            .subject(email)
+            .subject(id.toString())
+            .issuer(email)
             .issueTime(new Date())
             .expirationTime(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_MILLIS))
             .build();
@@ -43,11 +45,12 @@ public class JwtProvider {
         return signedJWT.serialize();
     }
 
-    public String createRefreshToken(String email) throws JOSEException {
+    public String createRefreshToken(String email, UUID id) throws JOSEException {
         JWSSigner signer = new MACSigner(secretKey.getBytes(StandardCharsets.UTF_8));
 
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-            .subject(email)
+            .subject(id.toString())
+            .issuer(email)
             .issueTime(new Date())
             .expirationTime(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_MILLIS))
             .build();
@@ -96,6 +99,15 @@ public class JwtProvider {
     }
 
     public String extractEmail(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.getJWTClaimsSet().getIssuer();
+        } catch (Exception e) {
+            throw new CommonException(ExceptionType.INTERNAL_SERVER_ERROR, null);
+        }
+    }
+
+    public String extractId(String token) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             return signedJWT.getJWTClaimsSet().getSubject();

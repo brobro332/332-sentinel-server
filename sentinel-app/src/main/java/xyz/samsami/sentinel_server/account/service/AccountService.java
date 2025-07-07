@@ -50,13 +50,13 @@ public class AccountService {
 
     public Mono<AccountRespLoginDto> loginAccount(AccountReqLoginDto dto) {
         return repository.findByEmail(dto.getEmail())
-            .switchIfEmpty(Mono.error(new CommonException(ExceptionType.UNAUTHORIZED, "가입된 이메일이 없습니다.")))
+            .switchIfEmpty(Mono.error(new CommonException(ExceptionType.NOT_FOUND, "가입된 이메일이 없습니다.")))
             .flatMap(account -> {
                 if (!passwordEncoder.matches(dto.getPassword(), account.getPassword())) {
                     return Mono.error(new CommonException(ExceptionType.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."));
                 }
 
-                return jwtService.login(account.getEmail())
+                return jwtService.login(account.getEmail(), account.getId())
                     .map(tokenResponse -> new AccountRespLoginDto(
                         tokenResponse.getAccessToken(),
                         tokenResponse.getRefreshToken()

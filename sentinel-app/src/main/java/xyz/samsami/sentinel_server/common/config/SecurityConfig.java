@@ -40,6 +40,7 @@ public class SecurityConfig {
                 )
             .authorizeExchange(exchange -> exchange
                 .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                .pathMatchers(HttpMethod.GET, "/api/accounts/session").authenticated()
                 .pathMatchers(
                     "/api/accounts/**",
                     "/swagger-ui/**",
