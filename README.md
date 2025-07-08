@@ -28,5 +28,5 @@
 - 로깅 및 모니터링: `Logback`, `ELK`
 
 ### 🚀 **`Swagger`**
-
-- http://localhost:8080/webjars/swagger-ui/index.html
+- `.env` 파일의 포트 번호 환경변수 값을 `URL`에 포함해주세요.
+- `http://localhost:${PORT}/webjars/swagger-ui/index.html`
